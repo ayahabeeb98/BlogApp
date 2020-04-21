@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {handleLogin, loginWithFacebook, loginWithGoogle} from "../services/Services";
+import firebase , {auth} from "../services/firebase";
 
 const Login = ({history}) => {
     const [email,setEmail] = useState('');
     const [password,setPassword] = useState('');
+
 
     const validateForm = () => {
         let valid = true;
@@ -16,14 +18,36 @@ const Login = ({history}) => {
 
         return valid;
     };
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if(validateForm()) {
-            handleLogin(email,password);
+            await auth.signInWithEmailAndPassword(email,password);
             history.push('/')
         }
     };
 
+    const handleSkip = () => {
+        auth.signInAnonymously()
+            .then((result) => {
+                console.log('signin ' , result )
+            })
+            .catch((error) => console.log(error.message))
+
+    };
+
+    const handleLoginAnonymous = () => {
+        const credential = firebase.auth.EmailAuthProvider.credential(email, password);
+        const currentUser = auth.currentUser;
+
+        if (currentUser) {
+            currentUser.linkWithCredential(credential).then((userCredential) => {
+                const user = userCredential.user;
+                console.log("Account linking success", user);
+            }, (error) => {
+                console.log("Account linking error", error);
+            });
+        }
+    };
     return (
         <>
             <header className="main-header">
@@ -49,8 +73,10 @@ const Login = ({history}) => {
                     </div>
 
                     <button type="submit" className="btn-submit"> Login </button>
-
                 </form>
+                <button className="btn-submit btn-skip" onClick={handleSkip}> Skip </button>
+                <br/>
+                <button className="btn-submit btn-skip" onClick={handleLoginAnonymous}> Login Anonymous </button>
 
                 <p>or Sign up using</p>
                 <div className="social">

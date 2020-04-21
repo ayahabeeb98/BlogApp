@@ -1,0 +1,29 @@
+.profileCard {
+    background-color: #282c34;
+    width: 30%;
+    margin: 2rem 1rem 2rem auto;
+    border-radius: 1rem;
+    padding: 1rem
+;
+}
+
+
+
+.profileCard img {
+    width: 30%;
+    border-radius: 50%;
+
+}
+
+
+.profileCard .info {
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+.profileCard .btn-logout {
+    width: 30%;
+    padding: 0.5rem 0.3rem;
+    border-radius: 0.875rem;
+}

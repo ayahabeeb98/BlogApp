@@ -1,12 +1,15 @@
 import React , {useState} from 'react';
 import {loginWithFacebook, loginWithGoogle} from "../services/Services";
 import './style.css'
-import {registerNewUser, sendEmailVerification} from "../services/authService";
+import { sendEmailVerification} from "../helpers/auth";
 import {Link} from "react-router-dom";
+import {createUserDocument} from "../helpers/db";
+import {auth} from "../services/firebase";
 
 const Signup = ({history}) => {
-    const [name,setName] = useState('');
+    const [displayName,setDisplayName] = useState('');
     const [email,setEmail] = useState('');
+    const [location,setLocation] = useState('');
     const [password,setPassword] = useState('');
     const [confirmPassword,setConfirmPassword] = useState('');
 
@@ -14,11 +17,11 @@ const Signup = ({history}) => {
       let valid = true;
       let error = {};
 
-      if (!name || !email || !password || !confirmPassword){
+      if (!displayName || !email || !password || !confirmPassword){
           valid = false;
       }
 
-      if (name.length <= 2) {
+      if (displayName.length <= 2) {
           error['nameError'] = "too short";
           valid = false;
       }
@@ -36,16 +39,28 @@ const Signup = ({history}) => {
     };
 
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
 
       if (validateForm()) {
-          registerNewUser(email,password,name);
-          history.push('/');
+          try {
+              const {user}  = await auth.createUserWithEmailAndPassword(
+                     email,
+                     password,
+                 );
+
+              console.log(user);
+             await createUserDocument(user,{displayName,location});
+             await sendEmailVerification(user);
+             history.push('/');
+         }catch (e) {
+             alert(e)
+         }
       }else {
           alert('ni')
       }
     };
+
     return (
       <>
           <header className="main-header">
@@ -56,9 +71,9 @@ const Signup = ({history}) => {
           <section className="formContent">
               <form action="" onSubmit={handleSubmit}>
                   <div className="inputWrapper">
-                      {name.length !== 0 ? <label htmlFor="name" className="topLabel"> Name </label> : null}
+                      {displayName.length !== 0 ? <label htmlFor="name" className="topLabel"> Name </label> : null}
                       <input type="text" id="name" placeholder=" User Name" className="inpt"
-                            value={name} onChange={(e)=>setName(e.target.value)}
+                            value={displayName} onChange={(e)=>setDisplayName(e.target.value)}
                        />
                   </div>
 
@@ -68,6 +83,14 @@ const Signup = ({history}) => {
                              value={email} onChange={(e)=>setEmail(e.target.value)}
                       />
                   </div>
+
+                  <div className="inputWrapper">
+                      {location.length !== 0 ? <label htmlFor="location" className="topLabel"> Location </label> : null}
+                      <input type="text" id="location" placeholder=" Location" className="inpt"
+                             value={location} onChange={(e)=>setLocation(e.target.value)}
+                      />
+                  </div>
+
 
                   <div className="inputWrapper">
                       {password.length !== 0 ? <label htmlFor="pass" className="topLabel"> Password </label> : null}

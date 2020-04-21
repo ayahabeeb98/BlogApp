@@ -125,3 +125,10 @@
     color: #FFF;
     cursor: pointer;
 }
+
+.formContent .btn-skip {
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.4);
+    color: lightslategrey;
+    width: 48%;
+}
